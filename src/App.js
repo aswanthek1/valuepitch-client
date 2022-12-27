@@ -1,10 +1,16 @@
-import FormPage from "./Pages/Form";
-
+import FormPage from "./Pages/FormPage";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import UserTablePage from "./Pages/UserTablePage";
 
 function App() {
   return (
     <div className="App">
-    <FormPage/>
+    <BrowserRouter>
+    <Routes>
+      <Route element={<FormPage/>} path='/' />
+      <Route element={<UserTablePage/>} path='/userList' />
+    </Routes>
+    </BrowserRouter>
     </div>
   );
 }
