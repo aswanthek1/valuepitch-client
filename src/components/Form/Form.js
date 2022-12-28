@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useFormik } from "formik";
 import toast, { Toaster } from "react-hot-toast";
-import {useNavigate} from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
+import { countriesApi } from "../Api/CountriesApi";
+import { registerApi } from "../Api/RegisterApi";
 import "./Form.css";
 
 const Form = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const [countries, setCountries] = useState([]);
   const [searchCountries, setSearchCountries] = useState("");
   const [filteredCountries, setFilteredCountries] = useState([]);
@@ -18,8 +19,7 @@ const Form = () => {
   };
 
   useEffect(() => {
-    axios
-      .get("https://restcountries.com/v2/all")
+    countriesApi()
       .then((response) => {
         setCountries(response.data);
       })
@@ -41,7 +41,7 @@ const Form = () => {
       dob: "",
       address: "",
     },
-    onSubmit: (values, { resetForm }) => {
+    onSubmit: async (values, { resetForm }) => {
       if (
         values.address.trim() === "" ||
         values.name.trim() === "" ||
@@ -59,11 +59,10 @@ const Form = () => {
       } else if (values.name.length < 3 || values.name.length > 25) {
         toast.error("Name need minimum 3 or maximum 25 charachters");
       } else {
-        axios
-          .post("http://localhost:4000/user/register", {
-            values,
-            country: searchCountries,
-          })
+        await registerApi({
+          values,
+          country: searchCountries,
+        })
           .then((response) => {
             console.log(response, "after submit");
             if (response.data.message === "user already exists") {
@@ -161,10 +160,17 @@ const Form = () => {
               </div>
               <div className="input_field">
                 <input type="submit" className="btn" />
-              </div><div className="input_field">
-               <button onClick={() => {navigate('/userList')}} className="btn">Go to lists</button>
               </div>
-
+              <div className="input_field">
+                <button
+                  onClick={() => {
+                    navigate("/userList");
+                  }}
+                  className="btn"
+                >
+                  Go to lists
+                </button>
+              </div>
             </div>
           </form>
         </div>

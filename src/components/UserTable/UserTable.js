@@ -6,17 +6,18 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
   TextField,
   Typography,
 } from "@mui/material/";
-import axios from "axios";
 import ConfirmModal from "../Modal/ConfirmModal";
 import toast, { Toaster } from "react-hot-toast";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { CSVLink } from "react-csv";
+import TableHeadPart from "./TableHead";
+import { EditDetails, getUsers } from "../Api/EditDetailsApi";
+import { countriesApi } from "../Api/CountriesApi";
 
 const UserTable = () => {
   const [users, setUsers] = useState([]);
@@ -31,30 +32,24 @@ const UserTable = () => {
 
   const handleOpen = () => setOpen(true);
 
-  const editDetails = (userId) => {
+  const editDetails = async (userId) => {
     setEditField({});
-    console.log("editing details", editField);
-    try {
-      axios
-        .patch("http://localhost:4000/user/editDetails", editField)
-        .then((response) => {
-          console.log("delete response", response);
-          if (response.data.message === "updated") {
-            setRefreshState(!refresh);
-            toast.success("Details updated");
-          }
-        });
-    } catch (error) {}
+    await EditDetails(editField)
+      .then((response) => {
+        if (response.data.message === "updated") {
+          setRefreshState(!refresh);
+          toast.success("Details updated");
+        }
+      })
+      .catch((error) => console.log(error));
   };
 
   useEffect(() => {
-    axios
-      .get("http://localhost:4000/user/users")
+    getUsers()
       .then((response) => {
-        console.log("response of users", response);
         setUsers(response.data);
       })
-      .catch((error) => console.log("error found", error));
+      .catch((error) => console.log(error));
   }, [refresh]);
 
   useEffect(() => {
@@ -66,8 +61,7 @@ const UserTable = () => {
   }, [searchCountries, countries]);
 
   useEffect(() => {
-    axios
-      .get("https://restcountries.com/v2/all")
+    countriesApi()
       .then((response) => {
         setCountries(response.data);
       })
@@ -145,34 +139,7 @@ const UserTable = () => {
         sx={{ marginTop: "80px", maxWidth: "80%" }}
       >
         <Table sx={{ minWidth: 500 }} aria-label="simple table">
-          <TableHead sx={{ backgroundColor: "aquamarine", color: "white" }}>
-            <TableRow>
-              <TableCell align="center">
-                <b>No</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Name</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Email</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Date Of Birth</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Country</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Address</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Edit</b>
-              </TableCell>
-              <TableCell align="center">
-                <b>Delete</b>
-              </TableCell>
-            </TableRow>
-          </TableHead>
+          <TableHeadPart />
           <TableBody>
             {searchData.map((user, index) => (
               <>
